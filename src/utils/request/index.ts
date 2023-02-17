@@ -6,7 +6,6 @@ import {
   HTTP_REQUEST_URL,
 } from "@/configs/app"
 import { userStore } from "@/stores/modules/user"
-import type { ResultData } from "@/api/interface"
 
 type RequestOptionsMethod =
   | "OPTIONS"
@@ -24,13 +23,13 @@ type RequestOptionsMethodAll =
 /**
  * 发送请求
  */
-function baseRequest<T>(
+function baseRequest(
   url: string,
   method: RequestOptionsMethod,
   data: any,
   { noAuth = false, noVerify = false }: any,
   params: unknown
-): Promise<ResultData<T>> {
+) {
   const user = userStore()
   const { token } = toRefs(user)
   const Url = HTTP_REQUEST_URL
@@ -40,6 +39,11 @@ function baseRequest<T>(
   }
   if (!noAuth) {
     if (!token.value) {
+      uni.showToast({
+        icon: "none",
+        duration: 3000,
+        title: `未登录`,
+      })
       return Promise.reject({
         msg: "未登录",
       })
@@ -69,11 +73,21 @@ function baseRequest<T>(
         } else if (res.statusCode === 200) {
           reslove(res.data)
         } else {
+          uni.showToast({
+            icon: "none",
+            duration: 3000,
+            title: `${res.data.message || "系统错误"}`,
+          })
           reject(res.data.message || "系统错误")
         }
       },
       fail: (msg) => {
         uni.hideLoading()
+        uni.showToast({
+          icon: "none",
+          duration: 3000,
+          title: `请求失败`,
+        })
         reject("请求失败")
       },
     })
@@ -92,16 +106,13 @@ const requestOptions: RequestOptionsMethodAll[] = [
   "connect",
 ]
 type Methods = typeof requestOptions[number]
+
 const request: { [key in Methods]?: Function } = {}
 
 requestOptions.forEach((method) => {
   const m = method.toUpperCase() as unknown as RequestOptionsMethod
-  request[method] = <T>(
-    api: string,
-    data: any,
-    opt: any,
-    params: any
-  ): Promise<ResultData<T>> => baseRequest(api, m, data, opt || {}, params)
+  request[method] = (api: string, data: any, opt: any, params: any) =>
+    baseRequest(api, m, data, opt || {}, params)
 })
 
 export default request

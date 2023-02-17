@@ -26,16 +26,9 @@ export function getUserAndPermission() {
     const resHttp = res.data
     const data = resHttp.data
 
-    if (resHttp.code === 1) {
-      const user = userStore()
-      user.saveUserInfo(data)
-      getPermission()
-    } else {
-      uni.showToast({
-        title: resHttp.message,
-        icon: "none",
-      })
-    }
+    const user = userStore()
+    user.saveUserInfo(data)
+    getPermission()
   })
 }
 

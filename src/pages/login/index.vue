@@ -54,53 +54,30 @@ const rules = reactive({
 const handleGetUserInfo = async () => {
   const resHttp = (await getUserInfo()).data
   const data = resHttp.data
-
-  if (resHttp.code === 1) {
-    const user = userStore()
-    user.saveUserInfo(data)
-    const pemissions = await getMenuPermission()
-    const permissionList = translatePermissionList(pemissions)
-    user.saveUserPermissionList(permissionList)
-    uni.showToast({
-      title: `登陆成功`,
-    })
-    uni.switchTab({
-      url: "/pages/index/index",
-    })
-  } else {
-    uni.showToast({
-      title: resHttp.message,
-      icon: "none",
-    })
-  }
+  const user = userStore()
+  user.saveUserInfo(data)
+  const pemissions = await getMenuPermission()
+  const permissionList = translatePermissionList(pemissions)
+  user.saveUserPermissionList(permissionList)
+  uni.showToast({
+    title: `登陆成功`,
+  })
+  uni.switchTab({
+    url: "/pages/index/index",
+  })
 }
 const handleGetTicket = async (tmpTicket: any) => {
   const resHttpTicket = (await getTokenByTicket(tmpTicket)).data
   const dataTicket = resHttpTicket.data
-  if (resHttpTicket.code === 1) {
-    const userToken = dataTicket.token
-    uni.setStorageSync(USER_TOKEN, userToken)
-    handleGetUserInfo()
-  } else {
-    uni.showToast({
-      title: resHttpTicket.message,
-      icon: "none",
-    })
-  }
+  const userToken = dataTicket.token
+  uni.setStorageSync(USER_TOKEN, userToken)
+  handleGetUserInfo()
 }
 const handleLoginRes = (res: any) => {
   const resHttp = res.data
   const data = resHttp.data
-
-  if (resHttp.code === 1) {
-    const tmpTicket = data.returnUrl.replace("?tmpTicket=", "")
-    handleGetTicket(tmpTicket)
-  } else {
-    uni.showToast({
-      title: resHttp.message,
-      icon: "none",
-    })
-  }
+  const tmpTicket = data.returnUrl.replace("?tmpTicket=", "")
+  handleGetTicket(tmpTicket)
 }
 const baseForm = ref<HTMLElement | null>(null)
 const submit = () => {
